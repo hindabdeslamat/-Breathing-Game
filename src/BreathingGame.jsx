@@ -7,7 +7,7 @@ const steps = [
   { text: "Exhale - Slowly release the air", scale: 1 },
 ];
 
-const sessionDuration = 60; // مدة دقيقة واحدة
+const sessionDuration = 60; 
 const tips = [
   "Focus on your breathing.",
   "Relax your shoulders.",
@@ -29,12 +29,13 @@ const BreathingGame = () => {
     if (isRunning && timeLeft > 0) {
       interval = setInterval(() => {
         setTimeLeft((prev) => prev - 1);
+
         if ((sessionDuration - (timeLeft - 1)) % 4 === 0) {
           setStepIndex((prev) => (prev + 1) % steps.length);
           setTipIndex((prev) => (prev + 1) % tips.length);
         }
       }, 1000);
-    } else if (timeLeft <= 0) {
+    } else if (timeLeft <= 0 && isRunning) {
       setIsRunning(false);
       if (audioRef.current) {
         audioRef.current.pause();
@@ -50,9 +51,16 @@ const BreathingGame = () => {
     setStepIndex(0);
     setTipIndex(0);
     if (audioRef.current) {
+      audioRef.current.volume = 0.3;
       audioRef.current.play();
-      audioRef.current.volume = 0.4; // صوت منخفض
     }
+  };
+
+  const handleRestart = () => {
+    setTimeLeft(sessionDuration);
+    setStepIndex(0);
+    setTipIndex(0);
+    setIsRunning(false);
   };
 
   return (
@@ -61,9 +69,7 @@ const BreathingGame = () => {
 
       <div
         className="circle"
-        style={{
-          transform: `scale(${steps[stepIndex].scale})`,
-        }}
+        style={{ transform: `scale(${steps[stepIndex].scale})` }}
       ></div>
 
       <h2>{steps[stepIndex].text}</h2>
@@ -76,7 +82,10 @@ const BreathingGame = () => {
       )}
 
       {!isRunning && timeLeft === 0 && (
-        <p className="tip">Session completed! Well done 🌸</p>
+        <>
+          <p className="tip">Session completed! Well done 🌸</p>
+          <button onClick={handleRestart}>Restart Session</button>
+        </>
       )}
 
       <audio ref={audioRef} loop>
